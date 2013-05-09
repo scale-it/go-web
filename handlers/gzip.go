@@ -1,6 +1,6 @@
-// Copyright 2013 Alexandre Fiori
+// Copyright 2013 Alexandre Fiori, Robert Zaremba
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE.bsd file.
 
 // autogzip provides on-the-fly gzip encoding for http servers.
 package handlers
