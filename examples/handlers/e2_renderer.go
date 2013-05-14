@@ -14,10 +14,10 @@
  */
 
 // Run this, and from console:
-//    curl -i -H "Accept: application/msgpack"  http://localhost:8000
-//    curl -i -H "Accept: application/json"  http://localhost:8000
-//    curl -i -H "Accept: text/html"  http://localhost:8000
-//    curl  http://localhost:8000
+//    curl -i -H "Accept: application/msgpack"  http://localhost:8000/data
+//    curl -i -H "Accept: application/json"  http://localhost:8000/data
+//    curl -i http://localhost:8000/data
+//    curl -i http://localhost:8000
 package main
 
 import (
@@ -33,11 +33,17 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) (string, interface{}, 
 	return "simple.html", counter, 200
 }
 
+func DataHandler(w http.ResponseWriter, r *http.Request) (interface{}, int) {
+	counter += 1
+	return counter, 200
+}
+
 var Log = log.NewStd(os.Stderr, log.Levels.Debug, log.Ldate|log.Lmicroseconds, true)
 var counter int
 
 func main() {
 	t := template.Must(template.ParseGlob("./templates/*.html"))
-	http.Handle("/", handlers.Renderer{t, Log, IndexHandler})
+	http.Handle("/", handlers.TRenderer{Log, t, IndexHandler})
+	http.Handle("/data", handlers.Renderer{Log, DataHandler})
 	http.ListenAndServe(":8000", nil)
 }
