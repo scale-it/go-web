@@ -49,7 +49,7 @@ func (this Renderer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if data_error, ok := data.(error); ok {
 		http.Error(w, data_error.Error(), status)
 	}
-	switch negotiateRenderer(r) {
+	switch negotiateRenderer(r.Header.Get("Accept")) {
 	case r_json:
 		w.Header().Set("Content-Type", "application/json")
 		content, err := json.Marshal(data)
@@ -97,8 +97,8 @@ func write(logger *log.Logger, w http.ResponseWriter, data []byte, err error, st
 	w.Write(data)
 }
 
-func negotiateRenderer(r *http.Request) int {
-	for _, a := range strings.Split(r.Header.Get("Accept"), ",") {
+func negotiateRenderer(field string) int {
+	for _, a := range strings.Split(field, ",") {
 		if strings.Contains(a, "json") {
 			return r_json
 		}
