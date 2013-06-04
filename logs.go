@@ -19,7 +19,7 @@ func LogRequest(w io.Writer, req *http.Request, created time.Time, status, bytes
 	}
 	elapsed := float64(time.Since(created)) / float64(time.Millisecond)
 
-	fmt.Fprintf(w, "%s - %s \"%s %s %s\" %d %db \"%s\". Duration: %f ms\n",
+	fmt.Fprintf(w, "%s - %s \"%s %s %s\" %d %db \"%s\". %fms\n",
 		strings.Split(req.RemoteAddr, ":")[0],
 		username,
 		req.Method,
