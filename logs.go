@@ -3,8 +3,8 @@ package goweb
 import (
 	"fmt"
 	"io"
+	"net"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -18,9 +18,13 @@ func LogRequest(w io.Writer, req *http.Request, created time.Time, status, bytes
 		}
 	}
 	elapsed := float64(time.Since(created)) / float64(time.Millisecond)
+	ip, _, err := net.SplitHostPort(req.RemoteAddr)
+	if err != nil {
+		ip = req.RemoteAddr
+	}
 
 	fmt.Fprintf(w, "%s - %s \"%s %s %s\" %d %db \"%s\". %fms\n",
-		strings.Split(req.RemoteAddr, ":")[0],
+		ip,
 		username,
 		req.Method,
 		req.RequestURI,
