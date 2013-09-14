@@ -50,6 +50,7 @@ func (this Renderer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	data, status := this.H(w, r)
 	if data_error, ok := data.(error); ok {
 		http.Error(w, data_error.Error(), status)
+		return
 	}
 	switch negotiateRenderer(r.Header.Get("Accept")) {
 	case r_json:
