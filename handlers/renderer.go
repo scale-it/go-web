@@ -34,6 +34,8 @@ const (
 	r_unknown
 )
 
+type HandlerRend func(w http.ResponseWriter, r *http.Request) (interface{}, int)
+
 // Structure renderer. It renders the handler output using encoders (json, msgpack ...).
 // The encoder is chose by request "Content-type" header
 type Renderer struct {
@@ -41,7 +43,7 @@ type Renderer struct {
 	/* handler, which output will be rendered. It should return
 	 * data to be rendered. data is an error, then http.Error will be used to render it.
 	 * status code */
-	H func(w http.ResponseWriter, r *http.Request) (interface{}, int)
+	H HandlerRend
 }
 
 func (this Renderer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
