@@ -2,7 +2,6 @@ package goweb
 
 import (
 	"fmt"
-	"io"
 	"net"
 	"net/http"
 	"time"
@@ -10,7 +9,7 @@ import (
 
 // Function which construct Apache like message with information
 // about request duration
-func LogRequest(w io.Writer, req *http.Request, created time.Time, status, bytes int) {
+func LogRequest(log func(string), req *http.Request, created time.Time, status, bytes int) {
 	username := "-"
 	if req.URL.User != nil {
 		if name := req.URL.User.Username(); name != "" {
@@ -23,7 +22,7 @@ func LogRequest(w io.Writer, req *http.Request, created time.Time, status, bytes
 		ip = req.RemoteAddr
 	}
 
-	fmt.Fprintf(w, "%s - %s \"%s %s %s\" %d %db \"%s\". %fms\n",
+	log(fmt.Sprintf("%s - %s \"%s %s %s\" %d %dB \"%s\". %fms",
 		ip,
 		username,
 		req.Method,
@@ -32,5 +31,5 @@ func LogRequest(w io.Writer, req *http.Request, created time.Time, status, bytes
 		status,
 		bytes,
 		req.UserAgent(),
-		elapsed)
+		elapsed))
 }

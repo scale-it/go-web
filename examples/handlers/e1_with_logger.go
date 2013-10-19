@@ -41,7 +41,8 @@ func main() {
 	// here we use httpxtra, which preserve status code and support logger function.
 	http.Handle("/log", handlers.XHandler{
 		Logger: func(req *http.Request, created time.Time, status, bytes int) {
-			goweb.LogRequest(logger, req, created, status, bytes)
+			goweb.LogRequest(func(s string) { logger.Debug(s) },
+				req, created, status, bytes)
 		},
 		Handler: http.HandlerFunc(IndexHandler)})
 	http.HandleFunc("/", IndexHandler)
