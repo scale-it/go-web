@@ -20,6 +20,9 @@ type IOResponseWriter struct {
 func (w IOResponseWriter) Write(b []byte) (int, error) {
 	return w.Writer.Write(b)
 }
+func (w IOResponseWriter) WriteHeader(i int) {
+	w.ResponseWriter.WriteHeader(i)
+}
 
 // Handle provides on-the-fly gzip encoding for other handlers.
 //
@@ -37,7 +40,7 @@ func (w IOResponseWriter) Write(b []byte) (int, error) {
 //	func main() {
 //		http.HandleFunc("/download1", DL1Handler)
 //		http.HandleFunc("/download2", DL2Handler)
-//		http.ListenAndServe(":8080", autogzip.Handle(http.DefaultServeMux))
+//		http.ListenAndServe(":8080", Gzip(http.DefaultServeMux))
 //	}
 func Gzip(h http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
