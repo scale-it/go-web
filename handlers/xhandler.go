@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"bufio"
-	"net"
 	"net/http"
 	"time"
 )
@@ -20,7 +18,7 @@ type XHandler struct {
 
 func (h XHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	t := time.Now()
-	lw := logWriter{w: w}
+	wp := WrapWriter(w)
 	if h.Handler == nil {
 		h.Handler = http.DefaultServeMux
 	}
@@ -33,43 +31,12 @@ func (h XHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			r.RemoteAddr = ip
 		}
 	}
-	h.Handler.ServeHTTP(&lw, r)
+	originalPath := r.URL.Path // this can be overwritten by a middleware
+	h.Handler.ServeHTTP(wp, r)
 	if h.Logger != nil {
-		h.Logger(r, t, lw.status, lw.bytes)
+		h.Logger(r, originalPath, t, wp.Status(), wp.BytesWritten())
 	}
 }
 
 // LoggerFunc can be called by XHandler at the end of each request.
-type LoggerFunc func(r *http.Request, created time.Time, status, bytes int)
-
-type logWriter struct {
-	w      http.ResponseWriter
-	bytes  int
-	status int
-}
-
-func (lw *logWriter) Header() http.Header {
-	return lw.w.Header()
-}
-
-func (lw *logWriter) Write(b []byte) (int, error) {
-	if lw.status == 0 {
-		lw.status = http.StatusOK
-	}
-	n, err := lw.w.Write(b)
-	lw.bytes += n
-	return n, err
-}
-
-func (lw *logWriter) WriteHeader(s int) {
-	lw.w.WriteHeader(s)
-	lw.status = s
-}
-
-func (lw *logWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
-	if lw.status == 0 {
-		lw.status = http.StatusOK
-	}
-	// TODO: Check. Does it break if the server don't support hijacking?
-	return lw.w.(http.Hijacker).Hijack()
-}
+type LoggerFunc func(r *http.Request, patch string, created time.Time, status, bytes int)

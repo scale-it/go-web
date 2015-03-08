@@ -32,7 +32,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Hello, world", counter)
 }
 
-var logger *log.Logger = log.New()
+var logger *log.Logger = log.New(fmt.Sprintln, fmt.Sprintf)
 var counter int
 
 func main() {
@@ -40,7 +40,7 @@ func main() {
 
 	// here we use httpxtra, which preserve status code and support logger function.
 	http.Handle("/log", handlers.XHandler{
-		Logger: func(req *http.Request, created time.Time, status, bytes int) {
+		Logger: func(req *http.Request, path string, created time.Time, status, bytes int) {
 			goweb.LogRequest(func(s string) { logger.Debug(s) },
 				req, created, status, bytes)
 		},
