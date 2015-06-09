@@ -18,8 +18,8 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/hinasssan/msgpack-go"
 	"github.com/scale-it/go-log"
+	"github.com/ugorji/go/codec"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -33,6 +33,8 @@ const (
 	r_xml
 	r_unknown
 )
+
+var msgpackHandle codec.MsgpackHandle
 
 type HandlerRend func(w http.ResponseWriter, r *http.Request) (interface{}, int)
 
@@ -48,8 +50,8 @@ type Renderer struct {
 
 func (this Renderer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	data, status := this.H(w, r)
-	if data_error, ok := data.(error); ok {
-		http.Error(w, data_error.Error(), status)
+	if dataErr, ok := data.(error); ok {
+		http.Error(w, dataErr.Error(), status)
 		return
 	}
 	switch negotiateRenderer(r.Header.Get("Accept")) {
@@ -59,8 +61,10 @@ func (this Renderer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		write(this.Log, w, content, err, status)
 	case r_msgpack:
 		w.Header().Set("Content-Type", "application/x-msgpack")
-		content, err := msgpack.Marshal(data)
-		write(this.Log, w, content, err, status)
+		w.WriteHeader(status)
+		err := codec.NewEncoder(w, &msgpackHandle).
+			Encode(data)
+		writeError(this.Log, w, err)
 	default:
 		w.Header().Set("Content-Type", "text/plain")
 		write(this.Log, w, []byte(fmt.Sprint(data)), nil, status)
@@ -80,8 +84,8 @@ type TRenderer struct {
 
 func (this TRenderer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	tname, data, status := this.H(w, r)
-	if data_error, ok := data.(error); ok {
-		http.Error(w, data_error.Error(), status)
+	if dataErr, ok := data.(error); ok {
+		http.Error(w, dataErr.Error(), status)
 	}
 	w.Header().Set("Content-Type", "text/html")
 	if err := this.T.ExecuteTemplate(w, tname, data); err != nil {
@@ -90,14 +94,18 @@ func (this TRenderer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func write(logger *log.Logger, w http.ResponseWriter, data []byte, err error, status int) {
+	writeError(logger, w, err)
+	w.Header().Set("Content-Length", strconv.Itoa(len(data)))
+	w.WriteHeader(status)
+	w.Write(data)
+}
+
+func writeError(logger *log.Logger, w http.ResponseWriter, err error) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		logger.Error(err.Error())
 		return
 	}
-	w.Header().Set("Content-Length", strconv.Itoa(len(data)))
-	w.WriteHeader(status)
-	w.Write(data)
 }
 
 func negotiateRenderer(field string) int {
