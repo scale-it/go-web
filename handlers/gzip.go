@@ -8,8 +8,10 @@ package handlers
 import (
 	"compress/gzip"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"strings"
+	"sync"
 )
 
 type IOResponseWriter struct {
@@ -43,15 +45,24 @@ func (w IOResponseWriter) WriteHeader(i int) {
 //		http.ListenAndServe(":8080", Gzip(http.DefaultServeMux))
 //	}
 func Gzip(h http.Handler) http.HandlerFunc {
+	var pool sync.Pool
+	pool.New = func() interface{} {
+		return gzip.NewWriter(ioutil.Discard)
+	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Do nothing on a HEAD request
-		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") || r.Method == "HEAD" {
+		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") || r.Method == "HEAD" ||
+			w.Header().Get("Content-Encoding") == "gzip" { // Skip compression if already compressed
+
 			h.ServeHTTP(w, r)
 			return
 		}
 		w.Header().Set("Content-Encoding", "gzip")
-		gz := gzip.NewWriter(w)
+		gz := pool.Get().(*gzip.Writer)
 		defer gz.Close()
-		h.ServeHTTP(IOResponseWriter{Writer: gz, ResponseWriter: w}, r)
+		defer pool.Put(gz)
+		gz.Reset(w)
+
+		h.ServeHTTP(IOResponseWriter{Writer: gz, ResponseWriter: WrapWriter(w)}, r)
 	}
 }
