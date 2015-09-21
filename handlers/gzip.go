@@ -59,10 +59,10 @@ func Gzip(h http.Handler) http.HandlerFunc {
 		}
 		w.Header().Set("Content-Encoding", "gzip")
 		gz := pool.Get().(*gzip.Writer)
-		defer gz.Close()
 		defer pool.Put(gz)
 		gz.Reset(w)
 
 		h.ServeHTTP(IOResponseWriter{Writer: gz, ResponseWriter: WrapWriter(w)}, r)
+		gz.Close()
 	}
 }
