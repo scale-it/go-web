@@ -42,7 +42,7 @@ var Log = log.NewStd(os.Stderr, log.Levels.Debug, log.Ldate|log.Lmicroseconds, t
 var counter int
 
 func main() {
-	t := template.Must(template.ParseGlob("./templates/*.html"))
+	t := template.Must(template.ParseGlob("../templates/*.html"))
 	http.Handle("/", handlers.TRenderer{Log, t, IndexHandler})
 	http.Handle("/data", handlers.Renderer{Log, DataHandler})
 	http.ListenAndServe(":8000", nil)
