@@ -13,8 +13,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/fiorix/go-web/httpxtra"
-	"github.com/fiorix/go-web/remux"
+	"github.com/scale-it/go-web/httpxtra"
+	"github.com/scale-it/go-web/remux"
 )
 
 const (

@@ -18,8 +18,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/fiorix/go-web/httpxtra"
-	"github.com/fiorix/go-web/sse"
+	"github.com/scale-it/go-web/httpxtra"
+	"github.com/scale-it/go-web/sse"
 )
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
