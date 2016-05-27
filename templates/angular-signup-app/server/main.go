@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"github.com/fiorix/go-redis/redis"
-	"github.com/fiorix/go-web/httpxtra"
+	"github.com/scale-it/go-web/httpxtra"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
 )

@@ -17,7 +17,7 @@ now uses the standard http package, making it easier to be used along with
 
 ## Examples
 
-There are some nice [examples](https://github.com/fiorix/go-web/tree/master/examples) including a full featured web application with sign up, using MySQL and
+There are some nice [examples](https://github.com/scale-it/go-web/tree/master/examples) including a full featured web application with sign up, using MySQL and
 Redis for storage.
 
 *example/handlers* contains step by step introduction to handlers package.

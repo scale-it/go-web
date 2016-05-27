@@ -8,7 +8,7 @@ all: server/server
 
 deps:
 	go get -u github.com/fiorix/go-redis/redis
-	go get -u github.com/fiorix/go-web/httpxtra
+	go get -u github.com/scale-it/go-web/httpxtra
 	go get -u github.com/go-sql-driver/mysql
 	go get -u github.com/gorilla/sessions
 

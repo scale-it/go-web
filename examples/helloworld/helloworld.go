@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/fiorix/go-web/httpxtra"
+	"github.com/scale-it/go-web/httpxtra"
 )
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {

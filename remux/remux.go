@@ -12,7 +12,7 @@
 //    	"fmt"
 //    	"net/http"
 //
-//    	"github.com/fiorix/go-web/remux"
+//    	"github.com/scale-it/go-web/remux"
 //    )
 //
 //    func IndexHandler(w http.ResponseWriter, r *http.Request) {

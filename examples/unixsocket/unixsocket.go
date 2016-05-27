@@ -25,7 +25,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/fiorix/go-web/httpxtra"
+	"github.com/scale-it/go-web/httpxtra"
 )
 
 func IndexHandler(w http.ResponseWriter, req *http.Request) {
