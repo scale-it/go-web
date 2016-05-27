@@ -15,9 +15,9 @@ import (
 	"time"
 
 	"github.com/fiorix/go-redis/redis"
-	"github.com/scale-it/go-web/httpxtra"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
-	_ "github.com/ziutek/mymysql/godrv"
+	"github.com/scale-it/go-web/httpxtra"
 )
 
 const VERSION = "1.0"
