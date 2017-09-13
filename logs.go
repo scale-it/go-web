@@ -2,13 +2,12 @@ package goweb
 
 import (
 	"fmt"
-	"net"
 	"net/http"
+	"strings"
 	"time"
 )
 
-// Function which construct Apache like message with information
-// about request duration
+// LogRequest constructs Apache like log with request duration
 func LogRequest(log func(string), req *http.Request, created time.Time, status, bytes int) {
 	username := "-"
 	if req.URL.User != nil {
@@ -17,10 +16,7 @@ func LogRequest(log func(string), req *http.Request, created time.Time, status, 
 		}
 	}
 	elapsed := float64(time.Since(created)) / float64(time.Millisecond)
-	ip, _, err := net.SplitHostPort(req.RemoteAddr)
-	if err != nil {
-		ip = req.RemoteAddr
-	}
+	ip := GetClientIP(req)
 
 	log(fmt.Sprintf("%s - %s \"%s %s %s\" %d %dB \"%s\". %fms",
 		ip,
@@ -32,4 +28,19 @@ func LogRequest(log func(string), req *http.Request, created time.Time, status, 
 		bytes,
 		req.UserAgent(),
 		elapsed))
+}
+
+// GetClientIP retrives request client IP
+func GetClientIP(req *http.Request) string {
+	ip := req.Header.Get("X-Real-IP")
+	if ip == "" {
+		ip = req.Header.Get("X-Forwarded-For")
+		if ip == "" {
+			ip = req.RemoteAddr
+		}
+	}
+	if colon := strings.LastIndex(ip, ":"); colon != -1 {
+		ip = ip[:colon]
+	}
+	return ip
 }
