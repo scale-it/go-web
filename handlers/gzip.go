@@ -7,6 +7,7 @@ package handlers
 
 import (
 	"compress/gzip"
+	"crypto/tls"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -65,4 +66,38 @@ func Gzip(h http.Handler) http.HandlerFunc {
 		h.ServeHTTP(IOResponseWriter{Writer: gz, ResponseWriter: WrapWriter(w)}, r)
 		gz.Close()
 	}
+}
+
+// GetGzipPage is an HTTP client that supports gzip encoding.
+func GetGzipPage(url string) ([]byte, error) {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Accept-Encoding", "gzip, deflate")
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	var body []byte
+	if resp.Header.Get("Content-Encoding") == "gzip" {
+		var gz *gzip.Reader
+		gz, err = gzip.NewReader(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		defer gz.Close()
+		body, err = ioutil.ReadAll(gz)
+	} else {
+		body, err = ioutil.ReadAll(resp.Body)
+	}
+	if err != nil {
+		return nil, err
+	}
+	return body, nil
 }

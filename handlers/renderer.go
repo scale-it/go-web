@@ -18,12 +18,12 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/scale-it/go-log"
-	"github.com/ugorji/go/codec"
 	"html/template"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/ugorji/go/codec"
 )
 
 const (
@@ -36,12 +36,17 @@ const (
 
 var msgpackHandle codec.MsgpackHandle
 
+// Logger is an interface for the Handler logging functionality
+type Logger interface {
+	Error(v ...interface{})
+}
+
 type HandlerRend func(w http.ResponseWriter, r *http.Request) (interface{}, int)
 
 // Structure renderer. It renders the handler output using encoders (json, msgpack ...).
 // The encoder is chose by request "Content-type" header
 type Renderer struct {
-	Log *log.Logger
+	Log Logger
 	/* handler, which output will be rendered. It should return
 	 * data to be rendered. data is an error, then http.Error will be used to render it.
 	 * status code */
@@ -73,7 +78,7 @@ func (this Renderer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // Template renderer. It renders the handler output using http.template.
 type TRenderer struct {
-	Log *log.Logger
+	Log Logger
 	T   *template.Template
 	/* handler, which output will be rendered. It should return
 	* template name which is a fielname associated to `T`.
@@ -93,14 +98,14 @@ func (this TRenderer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func write(logger *log.Logger, w http.ResponseWriter, data []byte, err error, status int) {
+func write(logger Logger, w http.ResponseWriter, data []byte, err error, status int) {
 	writeError(logger, w, err)
 	w.Header().Set("Content-Length", strconv.Itoa(len(data)))
 	w.WriteHeader(status)
 	w.Write(data)
 }
 
-func writeError(logger *log.Logger, w http.ResponseWriter, err error) {
+func writeError(logger Logger, w http.ResponseWriter, err error) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		logger.Error(err.Error())

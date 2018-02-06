@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-// Handler is the http.Handler wrapper with extra features.
+// Handler is the http.Handler wrapper which resolves real client IP
 type Handler struct {
 	Handler  http.Handler
 	Logger   LoggerFunc
