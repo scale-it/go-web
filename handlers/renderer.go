@@ -41,6 +41,8 @@ type Logger interface {
 	Error(v ...interface{})
 }
 
+// HandlerRend is enhanced Handler which returns the response rather than writing it
+// to the ResponseWriter
 type HandlerRend func(w http.ResponseWriter, r *http.Request) (interface{}, int)
 
 // Structure renderer. It renders the handler output using encoders (json, msgpack ...).
@@ -76,7 +78,8 @@ func (this Renderer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Template renderer. It renders the handler output using http.template.
+// TRenderer is a aemplate renderer.
+// It renders the handler output using http.template.
 type TRenderer struct {
 	Log Logger
 	T   *template.Template
