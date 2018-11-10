@@ -21,11 +21,12 @@
 package main
 
 import (
-	"github.com/scale-it/go-log"
-	"github.com/scale-it/go-web/handlers"
 	"html/template"
+	"log"
 	"net/http"
 	"os"
+
+	"github.com/scale-it/go-web/contentnegotiator"
 )
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) (string, interface{}, int) {
@@ -38,12 +39,12 @@ func DataHandler(w http.ResponseWriter, r *http.Request) (interface{}, int) {
 	return counter, 200
 }
 
-var Log = log.NewStd(os.Stderr, log.Levels.Debug, log.Ldate|log.Lmicroseconds, true)
 var counter int
+var logger = log.New(os.Stderr, "renderer", log.LstdFlags)
 
 func main() {
-	t := template.Must(template.ParseGlob("../templates/*.html"))
-	http.Handle("/", handlers.TRenderer{Log, t, IndexHandler})
-	http.Handle("/data", handlers.Renderer{Log, DataHandler})
+	t := template.Must(template.ParseGlob("../templat es/*.html"))
+	http.Handle("/", contentnegotiator.TRenderer{logger, t, IndexHandler})
+	http.Handle("/data", contentnegotiator.Renderer{logger, DataHandler})
 	http.ListenAndServe(":8000", nil)
 }

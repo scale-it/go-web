@@ -19,12 +19,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/scale-it/go-log"
-	"github.com/scale-it/go-web"
-	"github.com/scale-it/go-web/handlers"
+	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/scale-it/go-web"
+	"github.com/scale-it/go-web/handlers"
 )
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
@@ -32,7 +33,6 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Hello, world", counter)
 }
 
-var logger *log.Logger = log.New(fmt.Sprintln, fmt.Sprintf)
 var counter int
 
 func main() {
@@ -41,7 +41,7 @@ func main() {
 	// here we use httpxtra, which preserve status code and support logger function.
 	http.Handle("/log", handlers.XHandler{
 		Logger: func(req *http.Request, path string, created time.Time, status, bytes int) {
-			goweb.LogRequest(func(s string) { logger.Debug(s) },
+			goweb.LogRequest(func(s string) { log.Print(s) },
 				req, created, status, bytes)
 		},
 		Handler: http.HandlerFunc(IndexHandler)})
