@@ -15,7 +15,6 @@
 package ozzohandlers
 
 import (
-	"net/http"
 	"time"
 
 	routing "github.com/go-ozzo/ozzo-routing"
@@ -44,23 +43,19 @@ func (lt LogTrace) LogTrace(c *routing.Context) error {
 	if err, ok := err.(routing.HTTPError); ok {
 		status = err.StatusCode()
 	}
+	// We overwrite status only locally for the Trace
+	if status == 0 && err == nil {
+		status = 200
+	}
+	goweb.LogRequest(lt.logRequest, c.Request, t, status, w.BytesWritten())
 	if err != nil {
 		errStack, ok := err.(errstack.E)
-		// We want to log only server errors
-		if (status == 0 || status >= 500) && !(ok && errStack.IsReq()) {
+		// Error log only server errors
+		if status >= 500 || ok && !errStack.IsReq() {
 			lt.Logger.Error("Server error", "status", status, err)
-		} else {
+		} else if status != 404 {
 			lt.Logger.Debug("Client Error", "status", status, err)
 		}
 	}
-	// We overwrite status only locally for the Trace
-	if status == 0 {
-		if err != nil {
-			status = http.StatusInternalServerError
-		} else {
-			status = 200
-		}
-	}
-	goweb.LogRequest(lt.logRequest, c.Request, t, status, w.BytesWritten())
 	return err
 }
