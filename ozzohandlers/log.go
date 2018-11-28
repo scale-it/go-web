@@ -18,7 +18,6 @@ import (
 	"time"
 
 	routing "github.com/go-ozzo/ozzo-routing"
-	"github.com/robert-zaremba/errstack"
 	"github.com/robert-zaremba/log15"
 	goweb "github.com/scale-it/go-web"
 	"github.com/scale-it/go-web/handlers"
@@ -40,22 +39,14 @@ func (lt LogTrace) LogTrace(c *routing.Context) error {
 	// originalPath := r.URL.Path // this can be overwritten by a middleware
 	err := c.Next()
 	status := w.Status()
-	if err, ok := err.(routing.HTTPError); ok {
-		status = err.StatusCode()
-	}
-	// We overwrite status only locally for the Trace
-	if status == 0 && err == nil {
+	if err != nil {
+		if errRouting, ok := err.(routing.HTTPError); ok {
+			status = errRouting.StatusCode()
+		}
+	} else if status == 0 {
+		// We overwrite status only locally for the Trace
 		status = 200
 	}
 	goweb.LogRequest(lt.logRequest, c.Request, t, status, w.BytesWritten())
-	if err != nil {
-		errStack, ok := err.(errstack.E)
-		// Error log only server errors
-		if status >= 500 || ok && !errStack.IsReq() {
-			lt.Logger.Error("Server error", "status", status, err)
-		} else if status != 404 {
-			lt.Logger.Debug("Client Error", "status", status, err)
-		}
-	}
 	return err
 }
