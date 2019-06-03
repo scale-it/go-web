@@ -11,22 +11,31 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/scale-it/go-web/httpxtra"
+	goweb "github.com/scale-it/go-web"
+	"github.com/scale-it/go-web/handlers"
 )
 
-func IndexHandler(w http.ResponseWriter, r *http.Request) {
+func indexHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Hello, world")
 }
 
 func main() {
-	http.HandleFunc("/", IndexHandler)
+	http.Handle("/", withRequestLogger(http.HandlerFunc(indexHandler)))
 	srv := http.Server{
-		Addr:    ":8080",
-		Handler: httpxtra.Handler{Logger: logger},
+		Addr: ":8080",
 	}
 	srv.ListenAndServe()
 }
 
-func logger(r *http.Request, created time.Time, status, bytes int) {
-	fmt.Println(httpxtra.ApacheCommonLog(r, created, status, bytes))
+func logRequest(s string) { fmt.Println(s) }
+
+// WithRequestLogger tracks the request HTTP info and time
+func withRequestLogger(handler http.Handler) http.Handler {
+	return handlers.XHandler{
+		Logger: func(r *http.Request, path string, created time.Time, status, bytes int) {
+			goweb.LogRequest(logRequest, r, created, status, bytes)
+		},
+		Handler:  handler,
+		XHeaders: true,
+	}
 }

@@ -4,9 +4,10 @@ go-web is a collection of utilities for http servers written in Go.
 
 It has the following packages:
 
+- <root>: Apache log function
 - autogzip: An http.Handler that supports on-the-fly gzip encoding.
-- httpxtra: Essential logging and support for X-Real-IP and X-Forwarded-For.
-- handlers: A set of useful handlers which. Includes httpxtra and gzip functionality.
+- handlers: A set of useful handlers which. Includes gzip functionality.
+- middleware: useful middlewares for handling errors and authentication
 - remux: A very simple request multiplexer that supports regular expressions.
 - sse: Server-Sent Events, a.k.a. HTTP push notifications.
 

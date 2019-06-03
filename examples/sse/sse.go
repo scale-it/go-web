@@ -10,7 +10,6 @@ import (
 	"bufio"
 	"compress/gzip"
 	"encoding/json"
-	"fmt"
 	"html"
 	"log"
 	"net/http"
@@ -18,7 +17,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/scale-it/go-web/httpxtra"
 	"github.com/scale-it/go-web/sse"
 )
 
@@ -63,14 +61,9 @@ func main() {
 	http.HandleFunc("/", IndexHandler)
 	http.HandleFunc("/sse", SSEHandler)
 	server := http.Server{
-		Addr:    ":8080",
-		Handler: httpxtra.Handler{Logger: logger},
+		Addr: ":8080",
 	}
 	server.ListenAndServe()
-}
-
-func logger(r *http.Request, created time.Time, status, bytes int) {
-	fmt.Println(httpxtra.ApacheCommonLog(r, created, status, bytes))
 }
 
 type Message struct {
